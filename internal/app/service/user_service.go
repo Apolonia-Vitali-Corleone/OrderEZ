@@ -12,20 +12,20 @@ import (
 	"time"
 )
 
-type AuthService struct {
+type UserService struct {
 	userRepo *repository.UserRepository
 	redis    *redis.Client
 }
 
-func NewAuthService(redisClient *redis.Client, db *gorm.DB) *AuthService {
+func NewUserService(redisClient *redis.Client, db *gorm.DB) *UserService {
 	userRepo := repository.NewUserRepository(db)
-	return &AuthService{
+	return &UserService{
 		userRepo: userRepo,
 		redis:    redisClient,
 	}
 }
 
-func (s *AuthService) Login(username, password string) (string, error) {
+func (s *UserService) Login(username, password string) (string, error) {
 	user, err := s.userRepo.GetUserByUsername(username)
 	if err != nil {
 		return "", err
@@ -53,7 +53,7 @@ func (s *AuthService) Login(username, password string) (string, error) {
 	return token, nil
 }
 
-func (s *AuthService) Register(username, password string) (string, error) {
+func (s *UserService) Register(username, password string) (string, error) {
 	// 前端进行数据验证，确保我们这里收到的数据都是有效的
 	existingUser, err := s.userRepo.GetUserByUsername(username)
 	if err != nil {

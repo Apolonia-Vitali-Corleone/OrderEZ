@@ -6,15 +6,15 @@ import (
 	"net/http"
 )
 
-type AuthHandler struct {
-	authService *service.AuthService
+type UserHandler struct {
+	userService *service.UserService
 }
 
-func NewAuthHandler(authService *service.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+func NewAuthHandler(userService *service.UserService) *UserHandler {
+	return &UserHandler{userService: userService}
 }
 
-func (h *AuthHandler) Login(c *gin.Context) {
+func (h *UserHandler) Login(c *gin.Context) {
 	var loginData struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -25,7 +25,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.Login(loginData.Username, loginData.Password)
+	token, err := h.userService.Login(loginData.Username, loginData.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -34,7 +34,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-func (h *AuthHandler) Register(c *gin.Context) {
+func (h *UserHandler) Register(c *gin.Context) {
 	var registerData struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -45,7 +45,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.Register(registerData.Username, registerData.Password)
+	token, err := h.userService.Register(registerData.Username, registerData.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

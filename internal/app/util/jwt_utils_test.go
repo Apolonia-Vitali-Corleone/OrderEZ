@@ -11,7 +11,7 @@ func TestGenerateAndValidateToken(t *testing.T) {
 	fmt.Println(key)
 	fmt.Println("------????--------")
 
-	token, _ := GenerateToken("z")
+	token, _ := GenerateToken(156)
 	fmt.Println("-----???---------")
 	fmt.Println(token)
 	fmt.Println("------????--------")
