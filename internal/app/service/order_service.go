@@ -5,21 +5,22 @@ import (
 	"OrderEZ/internal/app/repository"
 	"OrderEZ/internal/infrastructure/messaging"
 	"encoding/json"
-	"github.com/streadway/amqp"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
 type OrderService struct {
 	orderRepo *repository.OrderRepository
+	redis     *redis.Client
 	rabbitMQ  *messaging.RabbitMQ
 }
 
-func NewOrderService(db *gorm.DB, rabbitMQConn *amqp.Connection) *OrderService {
+func NewOrderService(db *gorm.DB, redisClient *redis.Client, mq *messaging.RabbitMQ) *OrderService {
 	orderRepo := repository.NewOrderRepository(db)
-	rabbitMQ := messaging.NewRabbitMQ(rabbitMQConn)
 	return &OrderService{
 		orderRepo: orderRepo,
-		rabbitMQ:  rabbitMQ,
+		redis:     redisClient,
+		rabbitMQ:  mq,
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"OrderEZ/internal/app/model"
 	"OrderEZ/internal/app/repository"
 	"OrderEZ/internal/app/util"
+	"OrderEZ/internal/infrastructure/messaging"
 	"context"
 	"errors"
 	"github.com/go-redis/redis/v8"
@@ -15,13 +16,15 @@ import (
 type UserService struct {
 	userRepo *repository.UserRepository
 	redis    *redis.Client
+	rabbitMQ *messaging.RabbitMQ
 }
 
-func NewUserService(redisClient *redis.Client, db *gorm.DB) *UserService {
+func NewUserService(db *gorm.DB, redisClient *redis.Client, mq *messaging.RabbitMQ) *UserService {
 	userRepo := repository.NewUserRepository(db)
 	return &UserService{
 		userRepo: userRepo,
 		redis:    redisClient,
+		rabbitMQ: mq,
 	}
 }
 
@@ -39,13 +42,15 @@ func (s *UserService) Login(username, password string) (string, error) {
 		return "", errors.New("invalid password")
 	}
 
-	token, err := util.GenerateToken(user.ID)
+	token, err := util.GenerateToken(user.UserID)
 	if err != nil {
 		return "", err
 	}
 
+	tokenExpire := time.Minute * 5
+
 	// 将 token 存入 Redis 缓存会话数据
-	err = s.redis.Set(context.Background(), user.Username, token, 24*time.Hour).Err()
+	err = s.redis.Set(context.Background(), "login:token:"+token, user.UserID, tokenExpire).Err()
 	if err != nil {
 		return "", err
 	}
@@ -85,11 +90,26 @@ func (s *UserService) Register(username, password string) (string, error) {
 	byUsername, err := s.userRepo.GetUserByUsername(username)
 
 	// 生成 JWT 令牌
-	token, err := util.GenerateToken(byUsername.ID)
+	token, err := util.GenerateToken(byUsername.UserID)
 	if err != nil {
 		return "", err
 	}
 
 	return token, nil
 
+}
+
+// GetAllUsers 方法用于获取所有用户
+func (s *UserService) GetAllUsers(page, pageSize int) ([]model.User, error) {
+	return s.userRepo.GetAllUsers(page, pageSize)
+}
+
+// Logout 登出
+func (s *UserService) Logout(token string) error {
+	// 从 Redis 中删除令牌
+	err := s.redis.Del(context.Background(), token).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }

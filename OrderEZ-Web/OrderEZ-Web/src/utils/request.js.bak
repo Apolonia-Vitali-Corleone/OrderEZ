@@ -1,0 +1,21 @@
+// import axios from 'axios';
+//
+// export function logoutttt() {
+//     localStorage.removeItem('token');
+//     delete axios.defaults.headers.common['Authorization'];
+//     window.location.href = '/login'; // 直接跳转
+// }
+//
+// export function getToken() {
+//     return localStorage.getItem('token');
+// }
+//
+// export function setAuthToken(token) {
+//     localStorage.setItem('token', token);
+//     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+// }
+//
+// export function getAllUser(){
+//     axios.get()
+// }
+//

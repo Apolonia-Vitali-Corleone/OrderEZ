@@ -10,12 +10,16 @@ import (
 type Server struct {
 	userHandler  *handler.UserHandler
 	orderHandler *handler.OrderHandler
+	goodHandler  *handler.GoodHandler
+	cartHandler  *handler.CartHandler
 }
 
-func NewServer(userHandler *handler.UserHandler, orderHandler *handler.OrderHandler) *Server {
+func NewServer(userHandler *handler.UserHandler, orderHandler *handler.OrderHandler, goodHandler *handler.GoodHandler, cartHandler *handler.CartHandler) *Server {
 	return &Server{
 		userHandler:  userHandler,
 		orderHandler: orderHandler,
+		goodHandler:  goodHandler,
+		cartHandler:  cartHandler,
 	}
 }
 
@@ -30,20 +34,21 @@ func (s *Server) Run() {
 	// 使用 gin.Recovery()，防止程序因 panic 崩溃
 	g.Use(gin.Recovery())
 
-	//// 设置模板函数
-	//g.SetFuncMap(helperFuncs)
-	//
-	//// 加载 HTML 模板
-	//g.LoadHTMLGlob(filepath.Join("", "./view/**/*.html"))
-	//
-	//// 设置静态资源路径
-	//g.Static("/static", filepath.Join("", "./static"))
-	//g.Static("/plugs", filepath.Join("", "./static/plugs"))
-	//g.Static("/api", filepath.Join("", "./api"))
+	// 这个一定要放在路由前
+	g.Use(func(c *gin.Context) {
+		if c.Request.Method == "OPTIONS" {
+			c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			c.Header("Access-Control-Allow-Credentials", "true")
+			c.AbortWithStatus(204)
+			return
+		}
+	})
 
 	// 设置 CORS 规则
 	g.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "https://yourfrontend.com"}, // 允许的前端地址
+		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173", "http://10.7.205.88:5173"}, // 允许的前端地址
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -51,51 +56,42 @@ func (s *Server) Run() {
 		MaxAge:           12 * time.Hour, // 预检请求缓存时间
 	}))
 
-	// 认证路由
-	authGroup := g.Group("/user")
+	// 用户路由
+	userGroup := g.Group("/user")
 	{
-		authGroup.POST("/login", s.userHandler.Login)
-		authGroup.POST("/register", s.userHandler.Register)
+		// 登录
+		userGroup.POST("/login", s.userHandler.Login)
+
+		// 登出
+		userGroup.POST("/logout", s.userHandler.Logout)
+
+		// 注册
+		userGroup.POST("/register", s.userHandler.Register)
+
+		// 获取所有的用户
+		userGroup.GET("/users", s.userHandler.GetAllUsers)
 	}
 
 	// 订单路由
-	orderGroup := g.Group("/orders")
+	orderGroup := g.Group("/order")
 	{
+		// 创建订单
 		orderGroup.POST("", s.orderHandler.CreateOrder)
-		// 其他订单路由...
 	}
 
+	// 商品路由
+	goodGroup := g.Group("/good")
+	{
+		goodGroup.GET("/goods", s.goodHandler.GetAllGoods)
+		goodGroup.POST("/", s.goodHandler.AddGood)
+	}
+
+	cartGroup := g.Group("/cart")
+	{
+		cartGroup.GET("", s.cartHandler.GetCart)
+	}
 	err := g.Run("127.0.0.1:4444")
 	if err != nil {
 		return
 	}
 }
-
-//var helperFuncs = template.FuncMap{
-//	"jsExists": func(fpath string) bool {
-//		jspath := fmt.Sprintf("./static/js/%s.js", fpath)
-//		if _, err := PathExists(jspath); err == nil {
-//			return true
-//		}
-//		return false
-//	},
-//	"timeFormat": TimeFormat,
-//}
-//
-//func PathExists(path string) (bool, error) {
-//	_, err := os.Stat(path)
-//	if err == nil {
-//		return true, nil
-//	}
-//	if os.IsNotExist(err) {
-//		return false, nil
-//	}
-//	return false, err
-//}
-//
-//func TimeFormat(sec int64) string {
-//	if sec < 1 {
-//		return ""
-//	}
-//	return time.Unix(sec, 0).Format("2006-01-02")
-//}

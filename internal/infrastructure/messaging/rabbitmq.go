@@ -1,53 +1,60 @@
 package messaging
 
 import (
+	"fmt"
 	"github.com/streadway/amqp"
 	"log"
 )
 
 type RabbitMQ struct {
-	conn *amqp.Connection
+	conn    *amqp.Connection
+	channel *amqp.Channel
 }
 
-func NewRabbitMQ(conn *amqp.Connection) *RabbitMQ {
-	return &RabbitMQ{conn: conn}
-}
-
-func InitRabbitMQ() *amqp.Connection {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func NewRabbitMQ() (*RabbitMQ, error) {
+	conn, err := amqp.Dial("amqp://guest:guest@192.168.32.137:5672/")
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		return nil, fmt.Errorf("failed to connect to RabbitMQ: %w", err)
 	}
-	return conn
+
+	ch, err := conn.Channel()
+	if err != nil {
+		return nil, fmt.Errorf("failed to open a channel: %w", err)
+	}
+	return &RabbitMQ{conn: conn, channel: ch}, nil
 }
 
-func (r *RabbitMQ) Publish(queueName string, body []byte) error {
-	ch, err := r.conn.Channel()
-	if err != nil {
-		return err
-	}
-	defer ch.Close()
-
-	q, err := ch.QueueDeclare(
-		queueName, // name
-		false,     // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
+func (mq *RabbitMQ) Publish(queue string, body []byte) error {
+	q, err := mq.channel.QueueDeclare(
+		queue, // name
+		false, // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open a channel: %w", err)
 	}
 
-	err = ch.Publish(
+	err = mq.channel.Publish(
 		"",     // exchange
 		q.Name, // routing key
 		false,  // mandatory
 		false,  // immediate
 		amqp.Publishing{
-			ContentType: "application/json",
+			ContentType: "text/plain",
 			Body:        body,
 		})
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to publish a message: %w", err)
+	}
+	log.Printf("[*] Sent %s", body)
+	return nil
+}
+
+// Close 关闭 RabbitMQ 连接和通道
+func (mq *RabbitMQ) Close() {
+	mq.channel.Close()
+	mq.conn.Close()
 }

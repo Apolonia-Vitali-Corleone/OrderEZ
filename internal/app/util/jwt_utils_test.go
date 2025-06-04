@@ -20,7 +20,7 @@ func TestGenerateAndValidateToken(t *testing.T) {
 	fmt.Println("-----???---------")
 	fmt.Printf("%+v", validateToken)
 	fmt.Println("------????--------")
-	//// 定义一个测试用的用户 ID
+	//// 定义一个测试用的用户 GoodID
 	//userID := uint(123)
 	//
 	//// 生成令牌
@@ -35,9 +35,9 @@ func TestGenerateAndValidateToken(t *testing.T) {
 	//	t.Fatalf("ValidateToken failed: %v", err)
 	//}
 	//
-	//// 检查用户 ID 是否匹配
+	//// 检查用户 GoodID 是否匹配
 	//if claims.UserClaimsStr != userID {
-	//	t.Errorf("Expected user ID %d, but got %d", userID, claims.UserClaimsStr)
+	//	t.Errorf("Expected user GoodID %d, but got %d", userID, claims.UserClaimsStr)
 	//}
 	//
 	//// 检查令牌是否在有效期内

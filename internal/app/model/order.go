@@ -1,13 +1,12 @@
 package model
 
-import (
-	"time"
-)
-
 type Order struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `json:"user_id"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	OrderID     uint   `gorm:"primaryKey;not null" json:"order_id"`
+	UserID      uint   `gorm:"unique;not null" json:"user_id"`
+	OrderNumber string `gorm:"unique;not null" json:"order_number"`
+	TotalPrice  int    `gorm:"not null" json:"total_price"`
+}
+
+func (Order) TableName() string {
+	return "oe_order"
 }

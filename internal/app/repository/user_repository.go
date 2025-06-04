@@ -43,3 +43,14 @@ func (r *UserRepository) Save(user model.User) error {
 		return nil
 	})
 }
+
+// GetAllUsers 方法使用 GORM 查询指定页码和每页数量的用户
+func (r *UserRepository) GetAllUsers(page, pageSize int) ([]model.User, error) {
+	var users []model.User
+	offset := (page - 1) * pageSize
+	result := r.db.Offset(offset).Limit(pageSize).Find(&users)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return users, nil
+}
