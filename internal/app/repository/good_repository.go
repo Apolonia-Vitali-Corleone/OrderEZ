@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"OrderEZ/internal/app/model"
+	"OrderEZ/internal/po"
 	"gorm.io/gorm"
 )
 
@@ -16,8 +16,8 @@ func NewGoodRepository(db *gorm.DB) *GoodRepository {
 }
 
 // GetAllGoods 查询指定页码和每页数量的商品
-func (r *GoodRepository) GetAllGoods(page, pageSize int) ([]model.Good, error) {
-	var goods []model.Good
+func (r *GoodRepository) GetAllGoods(page, pageSize int) ([]po.Good, error) {
+	var goods []po.Good
 	offset := (page - 1) * pageSize
 	result := r.db.Offset(offset).Limit(pageSize).Find(&goods)
 	if result.Error != nil {
@@ -27,7 +27,7 @@ func (r *GoodRepository) GetAllGoods(page, pageSize int) ([]model.Good, error) {
 }
 
 // Add 方法用于向数据库中添加一个新的商品
-func (r *GoodRepository) Add(good model.Good) error {
+func (r *GoodRepository) Add(good po.Good) error {
 	result := r.db.Create(&good)
 	if result.Error != nil {
 		return result.Error
@@ -37,7 +37,7 @@ func (r *GoodRepository) Add(good model.Good) error {
 
 // DeleteGood 根据商品 GoodID 删除商品
 func (r *GoodRepository) DeleteGood(id int64) error {
-	result := r.db.Delete(&model.Good{}, id)
+	result := r.db.Delete(&po.Good{}, id)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -45,7 +45,7 @@ func (r *GoodRepository) DeleteGood(id int64) error {
 }
 
 // UpdateGood 更新商品信息
-func (r *GoodRepository) UpdateGood(good model.Good) error {
+func (r *GoodRepository) UpdateGood(good po.Good) error {
 	result := r.db.Save(&good)
 	if result.Error != nil {
 		return result.Error
@@ -54,14 +54,14 @@ func (r *GoodRepository) UpdateGood(good model.Good) error {
 }
 
 // GetGoodByID 根据商品 GoodID 获取商品信息
-func (r *GoodRepository) GetGoodByID(id int64) (model.Good, error) {
-	var good model.Good
+func (r *GoodRepository) GetGoodByID(id int64) (po.Good, error) {
+	var good po.Good
 	result := r.db.First(&good, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return model.Good{}, nil
+			return po.Good{}, nil
 		}
-		return model.Good{}, result.Error
+		return po.Good{}, result.Error
 	}
 	return good, nil
 }

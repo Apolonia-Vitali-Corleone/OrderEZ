@@ -1,9 +1,9 @@
 package service
 
 import (
-	"OrderEZ/internal/app/model"
 	"OrderEZ/internal/app/repository"
 	"OrderEZ/internal/infrastructure/messaging"
+	model2 "OrderEZ/internal/po"
 	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
@@ -28,7 +28,7 @@ func NewSeckillGoodService(db *gorm.DB, redisClient *redis.Client, mq *messaging
 }
 
 //// AddGood 方法用于添加一个新的商品
-//func (s *GoodService) AddGood(good model.Good) error {
+//func (s *GoodService) AddGood(good po.Good) error {
 //	if err := s.goodRepo.Add(good); err != nil {
 //		return fmt.Errorf("failed to add good: %w", err)
 //	}
@@ -71,7 +71,7 @@ func NewSeckillGoodService(db *gorm.DB, redisClient *redis.Client, mq *messaging
 //}
 //
 //// UpdateGood 更新商品信息
-//func (s *GoodService) UpdateGood(good model.Good) error {
+//func (s *GoodService) UpdateGood(good po.Good) error {
 //	if err := s.goodRepo.UpdateGood(good); err != nil {
 //		return fmt.Errorf("failed to update good: %w", err)
 //	}
@@ -95,7 +95,7 @@ func NewSeckillGoodService(db *gorm.DB, redisClient *redis.Client, mq *messaging
 //}
 
 // GetAllSeckillGoods 方法用于获取指定页码和每页数量的商品
-func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model.SeckillGood, error) {
+func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model2.SeckillGood, error) {
 	// 尝试从 Redis 缓存中获取商品列表
 	//key := fmt.Sprintf("goods:page:%d:size:%d", page, pageSize)
 	//cachedGoods, err := s.getGoodsFromCache(key)
@@ -118,7 +118,7 @@ func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model.Sec
 }
 
 //// GetGoodByID 根据商品 GoodID 获取商品信息
-//func (s *GoodService) GetGoodByID(id int64) (model.Good, error) {
+//func (s *GoodService) GetGoodByID(id int64) (po.Good, error) {
 //	// 尝试从 Redis 缓存中获取商品信息
 //	key := fmt.Sprintf("good:id:%d", id)
 //	cachedGood, err := s.getGoodFromCache(key)
@@ -129,7 +129,7 @@ func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model.Sec
 //	// 如果缓存中没有，从数据库中获取
 //	good, err := s.goodRepo.GetGoodByID(id)
 //	if err != nil {
-//		return model.Good{}, fmt.Errorf("failed to get good by GoodID from database: %w", err)
+//		return po.Good{}, fmt.Errorf("failed to get good by GoodID from database: %w", err)
 //	}
 //
 //	// 将从数据库获取的商品信息存入 Redis 缓存
@@ -150,7 +150,7 @@ func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model.Sec
 //key := fmt.Sprintf("goods:page:%d:size:%d", page, pageSize)
 //cachedGoods, err := s.getGoodsFromCache(key)
 //*/
-//func (s *GoodService) getGoodsFromCache(key string) ([]model.Good, error) {
+//func (s *GoodService) getGoodsFromCache(key string) ([]po.Good, error) {
 //	val, err := s.redis.Get(s.redis.Context(), key).Result()
 //	if err != nil {
 //		if err == redis.Nil {
@@ -158,7 +158,7 @@ func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model.Sec
 //		}
 //		return nil, err
 //	}
-//	var goods []model.Good
+//	var goods []po.Good
 //	err = json.Unmarshal([]byte(val), &goods)
 //	if err != nil {
 //		return nil, err
@@ -168,7 +168,7 @@ func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model.Sec
 //
 //// setGoodsInCache 将商品列表存入 Redis 缓存
 //// key就是goods:page:%d:size:%d，goods是查询出来的数据
-//func (s *GoodService) setGoodsInCache(key string, goods []model.Good) error {
+//func (s *GoodService) setGoodsInCache(key string, goods []po.Good) error {
 //	data, err := json.Marshal(goods)
 //	if err != nil {
 //		return err
@@ -177,24 +177,24 @@ func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model.Sec
 //}
 
 // getSeckillGoodFromCache 从 Redis 缓存中获取单个商品信息
-func (s *SeckillGoodService) getSeckillGoodFromCache(key string) (model.Good, error) {
+func (s *SeckillGoodService) getSeckillGoodFromCache(key string) (model2.Good, error) {
 	val, err := s.redis.Get(s.redis.Context(), key).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return model.Good{}, nil
+			return model2.Good{}, nil
 		}
-		return model.Good{}, err
+		return model2.Good{}, err
 	}
-	var good model.Good
+	var good model2.Good
 	err = json.Unmarshal([]byte(val), &good)
 	if err != nil {
-		return model.Good{}, err
+		return model2.Good{}, err
 	}
 	return good, nil
 }
 
 // setSeckillGoodInCache 将单个商品信息存入 Redis 缓存
-func (s *SeckillGoodService) setSeckillGoodInCache(key string, good model.Good) error {
+func (s *SeckillGoodService) setSeckillGoodInCache(key string, good model2.Good) error {
 	data, err := json.Marshal(good)
 	if err != nil {
 		return err

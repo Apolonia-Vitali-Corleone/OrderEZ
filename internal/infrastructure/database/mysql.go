@@ -21,7 +21,7 @@ func InitMySQL() (*gorm.DB, *sql.DB, error) {
 	return db, sqlDB, err
 
 	// 自动迁移模型
-	//db.AutoMigrate(&model.Order{})
+	//db.AutoMigrate(&po.Order{})
 	// 其他模型迁移...
 }
 

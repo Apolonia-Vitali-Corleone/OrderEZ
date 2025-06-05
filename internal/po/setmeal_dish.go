@@ -1,4 +1,4 @@
-package model
+package po
 
 type SetMealDish struct {
 	Id        uint64  `json:"id"`        // 中间表id

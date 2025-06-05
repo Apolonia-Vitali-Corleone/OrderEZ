@@ -1,4 +1,4 @@
-package model
+package po
 
 type User struct {
 	UserID   uint   `gorm:"primaryKey" json:"user_id"`

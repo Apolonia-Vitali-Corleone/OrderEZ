@@ -2,7 +2,7 @@ package handler
 
 import (
 	"OrderEZ/internal/app/service"
-	"OrderEZ/internal/app/util"
+	"OrderEZ/internal/util"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -35,7 +35,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
-	
+
 	fmt.Println("登录成功")
 }
 

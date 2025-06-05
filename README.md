@@ -597,7 +597,7 @@ service-name/
 #### Model
 
 ```go
-// internal/model/user.go
+// internal/po/user.go
 package model
 
 import (
@@ -785,7 +785,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 #### Model
 
 ```go
-// internal/model/dish.go
+// internal/po/dish.go
 package model
 
 import (
@@ -844,7 +844,7 @@ type DishRepository interface {
 #### Model
 
 ```go
-// internal/model/order.go
+// internal/po/order.go
 package model
 
 import (
@@ -910,7 +910,7 @@ type OrderService interface {
 #### Model
 
 ```go
-// internal/model/cart.go
+// internal/po/cart.go
 package model
 
 import (
@@ -931,7 +931,7 @@ type CartItem struct {
 #### Model
 
 ```go
-// internal/model/review.go
+// internal/po/review.go
 package model
 
 import (

@@ -1,4 +1,4 @@
-package model
+package po
 
 type OrderDetail struct {
 	OrderDetailID int    `gorm:"primaryKey;not null" json:"order_detail_id"`

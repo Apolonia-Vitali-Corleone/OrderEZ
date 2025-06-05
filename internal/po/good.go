@@ -1,4 +1,4 @@
-package model
+package po
 
 type Good struct {
 	GoodID    int64  `gorm:"primaryKey;not null" json:"good_id"`

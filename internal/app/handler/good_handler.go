@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"OrderEZ/internal/app/model"
 	"OrderEZ/internal/app/service"
-	"OrderEZ/internal/app/util"
+	"OrderEZ/internal/po"
+	"OrderEZ/internal/util"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -71,7 +71,7 @@ func (h *GoodHandler) AddGood(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	addGood := model.Good{
+	addGood := po.Good{
 		GoodID:    id,
 		GoodName:  goodData.GoodName,
 		GoodPrice: goodData.GoodPrice,

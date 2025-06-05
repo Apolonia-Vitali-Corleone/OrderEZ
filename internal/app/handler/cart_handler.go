@@ -2,7 +2,7 @@ package handler
 
 import (
 	"OrderEZ/internal/app/service"
-	"OrderEZ/internal/app/util"
+	"OrderEZ/internal/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

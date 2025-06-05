@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"OrderEZ/internal/app/model"
+	"OrderEZ/internal/po"
 	"gorm.io/gorm"
 )
 
@@ -13,7 +13,7 @@ func NewOrderRepository(db *gorm.DB) *OrderRepository {
 	return &OrderRepository{db: db}
 }
 
-func (r *OrderRepository) CreateOrder(order *model.Order) error {
+func (r *OrderRepository) CreateOrder(order *po.Order) error {
 	return r.db.Create(order).Error
 }
 

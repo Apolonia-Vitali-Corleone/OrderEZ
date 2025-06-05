@@ -1,4 +1,4 @@
-package model
+package po
 
 type DishFlavor struct {
 	Id     uint64 `json:"id"`      //口味id

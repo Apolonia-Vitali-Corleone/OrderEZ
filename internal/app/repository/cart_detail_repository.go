@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"OrderEZ/internal/app/model" // 请替换为实际的 model 包路径
+	"OrderEZ/internal/po"
 	"gorm.io/gorm"
 )
 
@@ -16,8 +16,8 @@ func NewCartDetailRepository(db *gorm.DB) *CartDetailRepository {
 }
 
 // GetCartDetailListByCartID 根据 cart_id 获取购物车详情列表
-func (r *CartDetailRepository) GetCartDetailListByCartID(cartID int64) ([]model.CartDetail, error) {
-	var cartDetails []model.CartDetail
+func (r *CartDetailRepository) GetCartDetailListByCartID(cartID int64) ([]po.CartDetail, error) {
+	var cartDetails []po.CartDetail
 	result := r.db.Where("cart_id = ?", cartID).Find(&cartDetails)
 	if result.Error != nil {
 		return nil, result.Error

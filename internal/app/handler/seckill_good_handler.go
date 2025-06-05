@@ -69,7 +69,7 @@ func (h *SeckillGoodHandler) GetAllSeckillGoods(c *gin.Context) {
 //	if err != nil {
 //		log.Fatal(err)
 //	}
-//	addGood := model.Good{
+//	addGood := po.Good{
 //		GoodID:    id,
 //		GoodName:  goodData.GoodName,
 //		GoodPrice: goodData.GoodPrice,

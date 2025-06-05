@@ -1,4 +1,4 @@
-package model
+package po
 
 type Cart struct {
 	CartID int64 `gorm:"primaryKey;not null" json:"cart_id"`

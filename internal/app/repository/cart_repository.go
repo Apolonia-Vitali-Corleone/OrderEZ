@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"OrderEZ/internal/app/model"
+	"OrderEZ/internal/po"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ func NewCartRepository(db *gorm.DB) *CartRepository {
 
 // GetCartIDByUserID 根据 user_id 获取 cart_id
 func (r *CartRepository) GetCartIDByUserID(userID int64) (int64, error) {
-	var cart model.Cart
+	var cart po.Cart
 	err := r.db.Select("cart_id").Where("user_id = ?", userID).First(&cart).Error
 	if err != nil {
 		return 0, err

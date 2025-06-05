@@ -1,10 +1,10 @@
 package service
 
 import (
-	"OrderEZ/internal/app/model"
 	"OrderEZ/internal/app/repository"
-	"OrderEZ/internal/app/util"
 	"OrderEZ/internal/infrastructure/messaging"
+	"OrderEZ/internal/po"
+	"OrderEZ/internal/util"
 	"context"
 	"errors"
 	"github.com/go-redis/redis/v8"
@@ -76,7 +76,7 @@ func (s *UserService) Register(username, password string) (string, error) {
 	}
 
 	// 创建新用户
-	var newUser model.User
+	var newUser po.User
 	newUser.Username = username
 	newUser.Password = hashedPassword
 
@@ -100,7 +100,7 @@ func (s *UserService) Register(username, password string) (string, error) {
 }
 
 // GetAllUsers 方法用于获取所有用户
-func (s *UserService) GetAllUsers(page, pageSize int) ([]model.User, error) {
+func (s *UserService) GetAllUsers(page, pageSize int) ([]po.User, error) {
 	return s.userRepo.GetAllUsers(page, pageSize)
 }
 

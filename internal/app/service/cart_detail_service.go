@@ -1,9 +1,9 @@
 package service
 
 import (
-	"OrderEZ/internal/app/model"
 	"OrderEZ/internal/app/repository"
 	"OrderEZ/internal/infrastructure/messaging"
+	"OrderEZ/internal/po"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
@@ -26,6 +26,6 @@ func NewCartDetailService(db *gorm.DB, redisClient *redis.Client, mq *messaging.
 }
 
 // GetCartDetailListByCartID 根据 cart_id 获取购物车详情列表
-func (s *CartDetailService) GetCartDetailListByCartID(cartID int64) ([]model.CartDetail, error) {
+func (s *CartDetailService) GetCartDetailListByCartID(cartID int64) ([]po.CartDetail, error) {
 	return s.cartDetailRepo.GetCartDetailListByCartID(cartID)
 }

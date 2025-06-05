@@ -1,4 +1,4 @@
-package model
+package po
 
 type SeckillGood struct {
 	SeckillGoodID    string  `gorm:"primaryKey;not null" json:"seckill_good_id"`
