@@ -8,18 +8,20 @@ import (
 )
 
 type Server struct {
-	userHandler  *handler.UserHandler
-	orderHandler *handler.OrderHandler
-	goodHandler  *handler.GoodHandler
-	cartHandler  *handler.CartHandler
+	userHandler        *handler.UserHandler
+	orderHandler       *handler.OrderHandler
+	goodHandler        *handler.GoodHandler
+	cartHandler        *handler.CartHandler
+	seckillGoodHandler *handler.SeckillGoodHandler
 }
 
-func NewServer(userHandler *handler.UserHandler, orderHandler *handler.OrderHandler, goodHandler *handler.GoodHandler, cartHandler *handler.CartHandler) *Server {
+func NewServer(userHandler *handler.UserHandler, orderHandler *handler.OrderHandler, goodHandler *handler.GoodHandler, cartHandler *handler.CartHandler, seckillGoodHandler *handler.SeckillGoodHandler) *Server {
 	return &Server{
-		userHandler:  userHandler,
-		orderHandler: orderHandler,
-		goodHandler:  goodHandler,
-		cartHandler:  cartHandler,
+		userHandler:        userHandler,
+		orderHandler:       orderHandler,
+		goodHandler:        goodHandler,
+		cartHandler:        cartHandler,
+		seckillGoodHandler: seckillGoodHandler,
 	}
 }
 
@@ -76,7 +78,7 @@ func (s *Server) Run() {
 	orderGroup := g.Group("/order")
 	{
 		// 创建订单
-		orderGroup.POST("", s.orderHandler.CreateOrder)
+		orderGroup.POST("/", s.orderHandler.CreateOrder)
 	}
 
 	// 商品路由
@@ -88,9 +90,16 @@ func (s *Server) Run() {
 
 	cartGroup := g.Group("/cart")
 	{
-		cartGroup.GET("", s.cartHandler.GetCart)
+		cartGroup.GET("/", s.cartHandler.GetCart)
 	}
+
+	seckillGoodGroup := g.Group("/seckill_good")
+	{
+		seckillGoodGroup.GET("", s.seckillGoodHandler.GetAllSeckillGoods)
+	}
+
 	err := g.Run("127.0.0.1:4444")
+
 	if err != nil {
 		return
 	}

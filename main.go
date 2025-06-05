@@ -33,14 +33,16 @@ func main() {
 	goodService := service.NewGoodService(mysql, redis, rabbitMQ)
 	cartService := service.NewCartService(mysql, redis, rabbitMQ)
 	cartDetailService := service.NewCartDetailService(mysql, redis, rabbitMQ)
+	seckillGoodService := service.NewSeckillGoodService(mysql, redis, rabbitMQ)
 
 	// 初始化处理器
-	authHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService)
 	orderHandler := handler.NewOrderHandler(orderService)
 	goodHandler := handler.NewGoodHandler(goodService)
 	cartHandler := handler.NewCartHandler(cartService, cartDetailService)
+	seckillGoodHandler := handler.NewSeckillGoodHandler(seckillGoodService)
 
 	//// 启动服务器
-	srv := server.NewServer(authHandler, orderHandler, goodHandler, cartHandler)
+	srv := server.NewServer(userHandler, orderHandler, goodHandler, cartHandler, seckillGoodHandler)
 	srv.Run()
 }
