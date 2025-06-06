@@ -1,4 +1,4 @@
-//module OrderEZ
+module order-service
 
 go 1.23.7
 
@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/cors v1.7.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/golang-jwt/jwt/v4 v4.5.1
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/streadway/amqp v1.1.0
 	golang.org/x/crypto v0.36.0
 	gorm.io/driver/mysql v1.5.7
@@ -14,7 +14,6 @@ require (
 )
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect

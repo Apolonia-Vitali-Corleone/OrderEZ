@@ -4,27 +4,27 @@ import (
 	"gorm.io/gorm"
 )
 
-// SeckillGoodRepository 定义商品仓库结构体
-type SeckillGoodRepository struct {
+// ItemRepository 定义商品仓库结构体
+type ItemRepository struct {
 	db *gorm.DB
 }
 
-// NewSeckillGoodRepository 创建一个新的 ItemRepository 实例
-func NewSeckillGoodRepository(db *gorm.DB) *SeckillGoodRepository {
-	return &SeckillGoodRepository{db: db}
+// NewGoodRepository 创建一个新的 ItemRepository 实例
+func NewGoodRepository(db *gorm.DB) *ItemRepository {
+	return &ItemRepository{db: db}
 }
 
-//// GetAllSeckillGoods 查询指定页码和每页数量的商品
-//func (r *SeckillGoodRepository) GetAllSeckillGoods(page, pageSize int) ([]model.SeckillGood, error) {
-//	var seckillGood []model.SeckillGood
+//// GetAllGoods 查询指定页码和每页数量的商品
+//func (r *ItemRepository) GetAllGoods(page, pageSize int) ([]model.Good, error) {
+//	var goods []model.Good
 //	offset := (page - 1) * pageSize
-//	result := r.db.Offset(offset).Limit(pageSize).Find(&seckillGood)
+//	result := r.db.Offset(offset).Limit(pageSize).Find(&goods)
 //	if result.Error != nil {
 //		return nil, result.Error
 //	}
-//	return seckillGood, nil
+//	return goods, nil
 //}
-
+//
 //// Add 方法用于向数据库中添加一个新的商品
 //func (r *ItemRepository) Add(good model.Good) error {
 //	result := r.db.Create(&good)

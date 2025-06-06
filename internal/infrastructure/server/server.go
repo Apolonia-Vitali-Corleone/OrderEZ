@@ -4,22 +4,24 @@ import (
 	"OrderEZ/internal/app/handler"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	handler2 "order-service/internal/handler"
 	"time"
+	handler3 "user-service/internal/handler"
 )
 
 type Server struct {
-	userHandler        *handler.UserHandler
-	orderHandler       *handler.OrderHandler
-	goodHandler        *handler.GoodHandler
+	userHandler        *handler3.UserHandler
+	orderHandler       *handler2.OrderHandler
+	itemHandler        *handler.ItemHandler
 	cartHandler        *handler.CartHandler
 	seckillGoodHandler *handler.SeckillGoodHandler
 }
 
-func NewServer(userHandler *handler.UserHandler, orderHandler *handler.OrderHandler, goodHandler *handler.GoodHandler, cartHandler *handler.CartHandler, seckillGoodHandler *handler.SeckillGoodHandler) *Server {
+func NewServer(userHandler *handler3.UserHandler, orderHandler *handler2.OrderHandler, itemHandler *handler.ItemHandler, cartHandler *handler.CartHandler, seckillGoodHandler *handler.SeckillGoodHandler) *Server {
 	return &Server{
 		userHandler:        userHandler,
 		orderHandler:       orderHandler,
-		goodHandler:        goodHandler,
+		itemHandler:        itemHandler,
 		cartHandler:        cartHandler,
 		seckillGoodHandler: seckillGoodHandler,
 	}
@@ -58,21 +60,21 @@ func (s *Server) Run() {
 		MaxAge:           12 * time.Hour, // 预检请求缓存时间
 	}))
 
-	// 用户路由
-	userGroup := g.Group("/user")
-	{
-		// 登录
-		userGroup.POST("/login", s.userHandler.Login)
-
-		// 登出
-		userGroup.POST("/logout", s.userHandler.Logout)
-
-		// 注册
-		userGroup.POST("/register", s.userHandler.Register)
-
-		// 获取所有的用户
-		userGroup.GET("/users", s.userHandler.GetAllUsers)
-	}
+	//// 用户路由
+	//userGroup := g.Group("/user")
+	//{
+	//	// 登录
+	//	userGroup.POST("/login", s.userHandler.Login)
+	//
+	//	// 登出
+	//	userGroup.POST("/logout", s.userHandler.Logout)
+	//
+	//	// 注册
+	//	userGroup.POST("/register", s.userHandler.Register)
+	//
+	//	// 获取所有的用户
+	//	userGroup.GET("/", s.userHandler.GetAllUsers)
+	//}
 
 	// 订单路由
 	orderGroup := g.Group("/order")
@@ -81,22 +83,22 @@ func (s *Server) Run() {
 		orderGroup.POST("/", s.orderHandler.CreateOrder)
 	}
 
-	// 商品路由
-	goodGroup := g.Group("/good")
-	{
-		goodGroup.GET("/goods", s.goodHandler.GetAllGoods)
-		goodGroup.POST("/", s.goodHandler.AddGood)
-	}
+	//// 商品路由
+	//goodGroup := g.Group("/good")
+	//{
+	//	goodGroup.GET("/goods", s.itemHandler.GetAllGoods)
+	//	goodGroup.POST("/", s.itemHandler.AddGood)
+	//}
 
-	cartGroup := g.Group("/cart")
-	{
-		cartGroup.GET("/", s.cartHandler.GetCart)
-	}
+	//cartGroup := g.Group("/cart")
+	//{
+	//	cartGroup.GET("/", s.cartHandler.GetCart)
+	//}
 
-	seckillGoodGroup := g.Group("/seckill_good")
-	{
-		seckillGoodGroup.GET("", s.seckillGoodHandler.GetAllSeckillGoods)
-	}
+	//seckillGoodGroup := g.Group("/seckill_good")
+	//{
+	//	seckillGoodGroup.GET("", s.seckillGoodHandler.GetAllSeckillGoods)
+	//}
 
 	err := g.Run("127.0.0.1:4444")
 

@@ -7,20 +7,20 @@ import (
 	"gorm.io/gorm"
 )
 
-// SeckillGoodService 商品服务结构体
-type SeckillGoodService struct {
-	seckillGoodRepo *repository.SeckillGoodRepository
-	redis           *redis.Client
-	rabbitMQ        *messaging.RabbitMQ
+// ItemService 商品服务结构体
+type ItemService struct {
+	goodRepo *repository.ItemRepository
+	redis    *redis.Client
+	rabbitMQ *messaging.RabbitMQ
 }
 
-// NewSeckillGoodService 创建一个新的 ItemService 实例
-func NewSeckillGoodService(db *gorm.DB, redisClient *redis.Client, mq *messaging.RabbitMQ) *SeckillGoodService {
-	seckillGoodRepo := repository.NewSeckillGoodRepository(db)
-	return &SeckillGoodService{
-		seckillGoodRepo: seckillGoodRepo,
-		redis:           redisClient,
-		rabbitMQ:        mq,
+// NewGoodService 创建一个新的 ItemService 实例
+func NewGoodService(db *gorm.DB, redisClient *redis.Client, mq *messaging.RabbitMQ) *ItemService {
+	goodRepo := repository.NewGoodRepository(db)
+	return &ItemService{
+		goodRepo: goodRepo,
+		redis:    redisClient,
+		rabbitMQ: mq,
 	}
 }
 
@@ -90,30 +90,30 @@ func NewSeckillGoodService(db *gorm.DB, redisClient *redis.Client, mq *messaging
 //
 //	return nil
 //}
-
-//// GetAllSeckillGoods 方法用于获取指定页码和每页数量的商品
-//func (s *SeckillGoodService) GetAllSeckillGoods(page, pageSize int) ([]model2.SeckillGood, error) {
-//	// 尝试从 Redis 缓存中获取商品列表
-//	//key := fmt.Sprintf("goods:page:%d:size:%d", page, pageSize)
-//	//cachedGoods, err := s.getGoodsFromCache(key)
-//	//if err == nil && len(cachedGoods) > 0 {
-//	//	return cachedGoods, nil
-//	//}
 //
-//	// 如果缓存中没有，从数据库中获取
-//	seckillGoods, err := s.seckillGoodRepo.GetAllSeckillGoods(page, pageSize)
-//	if err != nil {
-//		return nil, fmt.Errorf("failed to get seckill_goods from database: %w", err)
+//// GetAllGoods 方法用于获取指定页码和每页数量的商品
+//func (s *ItemService) GetAllGoods(page, pageSize int) ([]model.Good, error) {
+//	// 尝试从 Redis 缓存中获取商品列表
+//	key := fmt.Sprintf("goods:page:%d:size:%d", page, pageSize)
+//	cachedGoods, err := s.getGoodsFromCache(key)
+//	if err == nil && len(cachedGoods) > 0 {
+//		return cachedGoods, nil
 //	}
 //
-//	//// 将从数据库获取的商品列表存入 Redis 缓存
-//	//if err := s.setGoodsInCache(key, goods); err != nil {
-//	//	fmt.Printf("Failed to set goods in cache: %v\n", err)
-//	//}
+//	// 如果缓存中没有，从数据库中获取
+//	goods, err := s.goodRepo.GetAllGoods(page, pageSize)
+//	if err != nil {
+//		return nil, fmt.Errorf("failed to get goods from database: %w", err)
+//	}
 //
-//	return seckillGoods, nil
+//	// 将从数据库获取的商品列表存入 Redis 缓存
+//	if err := s.setGoodsInCache(key, goods); err != nil {
+//		fmt.Printf("Failed to set goods in cache: %v\n", err)
+//	}
+//
+//	return goods, nil
 //}
-
+//
 //// GetGoodByID 根据商品 GoodID 获取商品信息
 //func (s *ItemService) GetGoodByID(id int64) (model.Good, error) {
 //	// 尝试从 Redis 缓存中获取商品信息
@@ -172,39 +172,39 @@ func NewSeckillGoodService(db *gorm.DB, redisClient *redis.Client, mq *messaging
 //	}
 //	return s.redis.Set(s.redis.Context(), key, string(data), 0).Err()
 //}
-
-//// getSeckillGoodFromCache 从 Redis 缓存中获取单个商品信息
-//func (s *SeckillGoodService) getSeckillGoodFromCache(key string) (model2.Good, error) {
+//
+//// getGoodFromCache 从 Redis 缓存中获取单个商品信息
+//func (s *ItemService) getGoodFromCache(key string) (model.Good, error) {
 //	val, err := s.redis.Get(s.redis.Context(), key).Result()
 //	if err != nil {
 //		if err == redis.Nil {
-//			return model2.Good{}, nil
+//			return model.Good{}, nil
 //		}
-//		return model2.Good{}, err
+//		return model.Good{}, err
 //	}
-//	var good model2.Good
+//	var good model.Good
 //	err = json.Unmarshal([]byte(val), &good)
 //	if err != nil {
-//		return model2.Good{}, err
+//		return model.Good{}, err
 //	}
 //	return good, nil
 //}
 //
-//// setSeckillGoodInCache 将单个商品信息存入 Redis 缓存
-//func (s *SeckillGoodService) setSeckillGoodInCache(key string, good model2.Good) error {
+//// setGoodInCache 将单个商品信息存入 Redis 缓存
+//func (s *ItemService) setGoodInCache(key string, good model.Good) error {
 //	data, err := json.Marshal(good)
 //	if err != nil {
 //		return err
 //	}
 //	return s.redis.Set(s.redis.Context(), key, string(data), 0).Err()
 //}
-
-// clearGoodCache 清除单个商品的缓存
+//
+//// clearGoodCache 清除单个商品的缓存
 //func (s *ItemService) clearGoodCache(id int64) error {
 //	key := fmt.Sprintf("good:id:%d", id)
 //	return s.redis.Del(s.redis.Context(), key).Err()
 //}
-
+//
 //// clearGoodsCache 清除商品列表的缓存
 //func (s *ItemService) clearGoodsCache() error {
 //	keys, err := s.redis.Keys(s.redis.Context(), "goods:*").Result()
