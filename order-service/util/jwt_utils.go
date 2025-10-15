@@ -1,11 +1,10 @@
 package util
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
+	"os"
 	"strings"
 	"time"
 )
@@ -15,24 +14,14 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// 生成并初始化 jwtKey
-var jwtKey []byte
+const defaultJWTSecret = "order-ez-development-secret"
 
-func init() {
-	key, err := generateSecretKey()
-	if err != nil {
-		panic("Failed to generate secret key: " + err.Error())
+func jwtSigningKey() []byte {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = defaultJWTSecret
 	}
-	jwtKey = []byte(key)
-}
-
-func generateSecretKey() (string, error) {
-	key := make([]byte, 32)
-	_, err := rand.Read(key)
-	if err != nil {
-		panic("创建私钥失败！")
-	}
-	return base64.StdEncoding.EncodeToString(key), nil
+	return []byte(secret)
 }
 
 func GenerateToken(userID int64) (string, error) {
@@ -45,7 +34,7 @@ func GenerateToken(userID int64) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(jwtSigningKey())
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +42,6 @@ func GenerateToken(userID int64) (string, error) {
 	return tokenString, nil
 }
 
-// 定义自定义错误类型
 var (
 	ErrInvalidToken         = errors.New("无效的令牌")
 	ErrExpiredToken         = errors.New("令牌已过期")
@@ -63,15 +51,13 @@ var (
 func ValidateToken(tokenStr string) (*Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-		// 验证签名方法是否正确（防止算法替换攻击）
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrInvalidSigningMethod
 		}
-		return jwtKey, nil
+		return jwtSigningKey(), nil
 	})
 
 	if err != nil {
-		// 区分不同错误类型（如过期、签名错误等）
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
 				return nil, ErrExpiredToken
@@ -87,7 +73,6 @@ func ValidateToken(tokenStr string) (*Claims, error) {
 	return claims, nil
 }
 
-// HashPassword 加密密码
 func HashPassword(password string) (string, error) {
 	passwordBytes := []byte(password)
 	hashedPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
@@ -97,7 +82,6 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPasswordBytes), nil
 }
 
-// ParseBearerToken 辅助函数：解析 Bearer Token
 func ParseBearerToken(authHeader string) (string, error) {
 	parts := strings.Split(authHeader, " ")
 	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {

@@ -51,21 +51,33 @@ func main() {
 	if err != nil {
 		log.Fatalf("初始化数据库失败: %v", err)
 	}
-	defer database.CloseMySQL(sqlDB)
+	defer func() {
+		if err := database.CloseMySQL(sqlDB); err != nil {
+			log.Printf("关闭数据库连接失败: %v", err)
+		}
+	}()
 
 	// 初始化 Redis
 	redis, err := database.InitRedis()
 	if err != nil {
 		log.Fatalf("初始化Redis失败: %v", err)
 	}
-	defer database.CloseRedis(redis)
+	defer func() {
+		if err := database.CloseRedis(redis); err != nil {
+			log.Printf("关闭Redis连接失败: %v", err)
+		}
+	}()
 
 	// 初始化 RabbitMQ
 	rabbitMQ, err := messaging.NewRabbitMQ()
 	if err != nil {
 		log.Fatalf("初始化RabbitMQ失败: %v", err)
 	}
-	defer rabbitMQ.Close()
+	defer func() {
+		if err := rabbitMQ.Close(); err != nil {
+			log.Printf("关闭RabbitMQ失败: %v", err)
+		}
+	}()
 
 	// 初始化雪花ID生成器
 	idGen, err := util.NewSnowflake(1, 1)

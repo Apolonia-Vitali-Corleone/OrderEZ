@@ -2,32 +2,42 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 )
 
+const defaultMySQLDSN = "root:123@tcp(127.0.0.1:3306)/order_ez?charset=utf8mb4&parseTime=True&loc=Local"
+
+func mysqlDSN() string {
+	if dsn, ok := os.LookupEnv("MYSQL_DSN"); ok && dsn != "" {
+		return dsn
+	}
+	return defaultMySQLDSN
+}
+
 func InitMySQL() (*gorm.DB, *sql.DB, error) {
-	dsn := "root:123@tcp(192.168.32.137:3306)/order_ez?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(mysqlDSN()), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		return nil, nil, fmt.Errorf("failed to connect to MySQL: %w", err)
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to access underlying sql.DB: %w", err)
 	}
-	return db, sqlDB, err
-
-	// 自动迁移模型
-	//db.AutoMigrate(&model.Order{})
-	// 其他模型迁移...
+	return db, sqlDB, nil
 }
 
-func CloseMySQL(sqlDB *sql.DB) {
-	err := sqlDB.Close()
-	if err != nil {
-		log.Fatal(err)
+func CloseMySQL(sqlDB *sql.DB) error {
+	if sqlDB == nil {
+		return nil
 	}
+
+	if err := sqlDB.Close(); err != nil {
+		return fmt.Errorf("failed to close MySQL connection: %w", err)
+	}
+	return nil
 }
