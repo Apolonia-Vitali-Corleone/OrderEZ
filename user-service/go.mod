@@ -1,6 +1,8 @@
 module user-service
 
-go 1.23.7
+go 1.23.0
+
+toolchain go1.24.3
 
 require (
 	github.com/gin-contrib/cors v1.7.4
