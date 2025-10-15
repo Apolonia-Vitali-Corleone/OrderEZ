@@ -8,7 +8,6 @@ OrderEZ 是一个围绕餐饮点餐流程的多服务后端。项目包含独立
 .
 ├── docker-compose.yml           # 本地依赖环境（MySQL、Redis、RabbitMQ）
 ├── deploy/local/mysql/init.sql  # MySQL 初始化脚本
-├── internal/...                 # 聚合服务公用代码（需 integration 构建标签）
 ├── order-service/               # 订单微服务
 ├── user-service/                # 用户微服务
 └── Web/                         # 前端资源（可选）
@@ -117,4 +116,3 @@ cd ../user-service && go test ./...
 2. **JWT 鉴权失败**：确保所有服务使用相同的 `JWT_SECRET` 值，并在前端请求中通过 `Authorization: Bearer <token>` 传递。
 3. **RabbitMQ 队列不存在**：代码会在发布消息时自动声明队列，若仍失败，请检查 `RABBITMQ_URL` 与服务网络是否互通。
 
-若你希望同时运行聚合服务，可在满足依赖的情况下自行基于 `internal/` 目录的组件扩展；该部分需要在构建时显式添加 `-tags integration`。后续也可以在此基础上补充更多业务逻辑（如秒杀库存、购物车等）。
