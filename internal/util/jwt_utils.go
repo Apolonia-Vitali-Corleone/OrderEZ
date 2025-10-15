@@ -1,11 +1,10 @@
 package util
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
+	"os"
 	"time"
 )
 
@@ -14,24 +13,14 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// 生成并初始化 jwtKey
-var jwtKey []byte
+const defaultJWTSecret = "order-ez-development-secret"
 
-func init() {
-	key, err := generateSecretKey()
-	if err != nil {
-		panic("Failed to generate secret key: " + err.Error())
+func jwtSigningKey() []byte {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = defaultJWTSecret
 	}
-	jwtKey = []byte(key)
-}
-
-func generateSecretKey() (string, error) {
-	key := make([]byte, 32)
-	_, err := rand.Read(key)
-	if err != nil {
-		panic("创建私钥失败！")
-	}
-	return base64.StdEncoding.EncodeToString(key), nil
+	return []byte(secret)
 }
 
 func GenerateToken(userID int64) (string, error) {
@@ -44,7 +33,7 @@ func GenerateToken(userID int64) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(jwtSigningKey())
 	if err != nil {
 		return "", err
 	}
@@ -52,15 +41,12 @@ func GenerateToken(userID int64) (string, error) {
 	return tokenString, nil
 }
 
-// ValidateToken 解析并验证 JWT 令牌
 func ValidateToken(tokenString string) (*Claims, error) {
-	// 创建了一个内容为空？零值？的Claims实例
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
+		return jwtSigningKey(), nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +58,6 @@ func ValidateToken(tokenString string) (*Claims, error) {
 	return claims, nil
 }
 
-// HashPassword 加密密码
 func HashPassword(password string) (string, error) {
 	passwordBytes := []byte(password)
 	hashedPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)

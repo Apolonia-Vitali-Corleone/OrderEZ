@@ -1,48 +1,21 @@
 package util
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func TestGenerateAndValidateToken(t *testing.T) {
-	key, _ := generateSecretKey()
-	fmt.Println("-----???---------")
-	fmt.Println(key)
-	fmt.Println("------????--------")
+	t.Setenv("JWT_SECRET", "test-secret")
 
-	token, _ := GenerateToken(156)
-	fmt.Println("-----???---------")
-	fmt.Println(token)
-	fmt.Println("------????--------")
+	token, err := GenerateToken(156)
+	if err != nil {
+		t.Fatalf("GenerateToken failed: %v", err)
+	}
 
-	validateToken, _ := ValidateToken(token)
-	fmt.Println("-----???---------")
-	fmt.Printf("%+v", validateToken)
-	fmt.Println("------????--------")
-	//// 定义一个测试用的用户 GoodID
-	//userID := uint(123)
-	//
-	//// 生成令牌
-	//tokenString, err := GenerateToken(userID)
-	//if err != nil {
-	//	t.Fatalf("GenerateToken failed: %v", err)
-	//}
-	//
-	//// 验证令牌
-	//claims, err := ValidateToken(tokenString)
-	//if err != nil {
-	//	t.Fatalf("ValidateToken failed: %v", err)
-	//}
-	//
-	//// 检查用户 GoodID 是否匹配
-	//if claims.UserClaimsStr != userID {
-	//	t.Errorf("Expected user GoodID %d, but got %d", userID, claims.UserClaimsStr)
-	//}
-	//
-	//// 检查令牌是否在有效期内
-	//now := time.Now().Unix()
-	//if claims.ExpiresAt < now {
-	//	t.Errorf("Token has expired. Expiration time: %d, Current time: %d", claims.ExpiresAt, now)
-	//}
+	claims, err := ValidateToken(token)
+	if err != nil {
+		t.Fatalf("ValidateToken failed: %v", err)
+	}
+
+	if claims.UserID != 156 {
+		t.Fatalf("expected user id 156, got %d", claims.UserID)
+	}
 }
