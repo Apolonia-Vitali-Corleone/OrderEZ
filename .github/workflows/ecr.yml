@@ -48,9 +48,21 @@ jobs:
             echo "REF_TAG=latest" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build & Push
+      # 启用 Buildx（container 驱动，才能用 type=gha 缓存）
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          install: true
+          driver-opts: |
+            image=moby/buildkit:latest
+
+      # 用 matrix 构建并推送两个服务
+      - name: Build & Push (${{ matrix.name }}-service)
         uses: docker/build-push-action@v6
         with:
+          builder: ${{ steps.buildx.outputs.name }}
           context: ./${{ matrix.svc_dir }}
           file: ./${{ matrix.dockerfile }}
           push: true
