@@ -1,1 +1,4 @@
-.idea/
+.idea
+Web/test-dashboard/node_modules/
+Web/test-dashboard/dist/
+Web/test-dashboard/.vite/
