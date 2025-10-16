@@ -11,6 +11,7 @@ OrderEZ 是一个围绕餐饮点餐流程的多服务后端。项目包含独立
 ├── order-service/               # 订单微服务
 ├── user-service/                # 用户微服务
 └── Web/                         # 前端资源（可选）
+    └── test-dashboard/          # 可视化测试面板（React + Vite）
 ```
 
 ## 运行前准备
@@ -109,6 +110,18 @@ go test ./...
 cd order-service && go test ./...
 cd ../user-service && go test ./...
 ```
+
+## 可视化测试面板
+
+如果你希望通过 Web 界面快速验证接口是否可用，可使用 `Web/test-dashboard` 提供的 React 应用：
+
+```bash
+cd Web/test-dashboard
+npm install
+npm run dev
+```
+
+面板默认调用本地 `127.0.0.1` 上的用户服务与订单服务，你可以在左侧配置面板中修改地址、账号与测试订单明细，并按需执行各项测试。
 
 ## 常见问题
 
