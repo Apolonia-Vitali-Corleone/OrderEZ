@@ -1,0 +1,46 @@
+# syntax=docker/dockerfile:1
+ARG GO_VERSION=1.22
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+
+########################
+# Build stage
+########################
+FROM golang:${GO_VERSION}-alpine AS builder
+
+ARG SERVICE
+WORKDIR /src
+
+# 复制整个仓库（因为两个服务各自有 go.mod）
+COPY . .
+
+# 进入对应服务目录进行构建
+WORKDIR /src/${SERVICE}
+
+# 利用构建缓存，加速多次构建
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags="-s -w" -o /out/app ./...
+
+########################
+# Runtime stage
+########################
+FROM gcr.io/distroless/static:nonroot
+ARG SERVICE
+
+# 根据服务名称设置对应的端口
+ARG PORT
+RUN if [ "$SERVICE" = "user-service" ]; then \
+        echo "48482" > /port.txt; \
+    elif [ "$SERVICE" = "order-service" ]; then \
+        echo "48481" > /port.txt; \
+    fi
+ENV PORT=$(cat /port.txt)
+EXPOSE ${PORT}
+
+# 二进制无需动态库，直接复制
+COPY --from=builder /out/app /app
+
+USER nonroot:nonroot
+ENTRYPOINT ["/app"]
