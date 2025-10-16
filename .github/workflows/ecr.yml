@@ -1,0 +1,62 @@
+name: Build & Push two services to one ECR repo
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+
+env:
+  AWS_REGION: ap-east-2
+  AWS_ACCOUNT_ID: 818719120332
+  ECR_REPO: gcy-app
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: user
+            svc_dir: user-service
+            dockerfile: user-service/Dockerfile
+          - name: order
+            svc_dir: order-service
+            dockerfile: order-service/Dockerfile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsECRPush
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set tags
+        id: vars
+        run: |
+          echo "SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            echo "REF_TAG=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          else
+            echo "REF_TAG=latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.svc_dir }}
+          file: ./${{ matrix.dockerfile }}
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ matrix.name }}-${{ steps.vars.outputs.SHA }}
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ matrix.name }}-${{ steps.vars.outputs.REF_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
