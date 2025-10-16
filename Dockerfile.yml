@@ -8,38 +8,43 @@ ARG TARGETARCH=amd64
 ########################
 FROM golang:${GO_VERSION}-alpine AS builder
 
+# 为 HTTPS 访问准备证书（Alpine 自带）
+RUN apk add --no-cache ca-certificates
+
 ARG SERVICE
 WORKDIR /src
 
-# 复制整个仓库（因为两个服务各自有 go.mod）
+# 先拷外层清单，避免每次源码改动都失去缓存
+# 两个服务各有 go.mod，因此进到具体服务后再下载依赖
 COPY . .
 
-# 进入对应服务目录进行构建
 WORKDIR /src/${SERVICE}
 
-# 利用构建缓存，加速多次构建
+# 利用构建缓存
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
+
+# 仅构建当前服务（注意：不是 ./...）
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
-    go build -trimpath -ldflags="-s -w" -o /out/app ./...
+    go build -trimpath -ldflags="-s -w" -o /out/app .
 
 ########################
 # Runtime stage
 ########################
 FROM gcr.io/distroless/static:nonroot
-ARG SERVICE
 
-# 根据服务名称设置对应的端口
-ARG PORT
-RUN if [ "$SERVICE" = "user-service" ]; then \
-        echo "48482" > /port.txt; \
-    elif [ "$SERVICE" = "order-service" ]; then \
-        echo "48481" > /port.txt; \
-    fi
-ENV PORT=$(cat /port.txt)
+# 如需 HTTPS，拷贝根证书
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# 通过构建参数显式传入端口（更直白可靠）
+ARG PORT=8080
+ENV PORT=${PORT}
 EXPOSE ${PORT}
 
-# 二进制无需动态库，直接复制
+# 拷贝二进制
 COPY --from=builder /out/app /app
 
 USER nonroot:nonroot
