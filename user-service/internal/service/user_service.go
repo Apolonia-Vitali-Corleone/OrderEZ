@@ -69,16 +69,10 @@ func (s *UserService) Register(username, password string) (string, error) {
 		return "", errors.New("username already exists")
 	}
 
-	// 加密密码
-	hashedPassword, err := util.HashPassword(password)
-	if err != nil {
-		return "", err
-	}
-
 	// 创建新用户
 	var newUser po.User
 	newUser.Username = username
-	newUser.Password = hashedPassword
+	newUser.Password = password
 
 	// 保存用户信息
 	err = s.userRepo.Save(newUser)
