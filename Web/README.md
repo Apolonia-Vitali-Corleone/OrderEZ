@@ -13,7 +13,7 @@
 ## 快速开始
 
 ```bash
-cd Web/test-dashboard
+cd Web
 npm install
 npm run dev
 ```
