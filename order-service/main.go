@@ -48,7 +48,7 @@ func main() {
 
 	// 设置 CORS 规则
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173", "http://10.7.205.88:5173"},
+		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173", "http://10.7.205.88:5173", "http://localhost:5174", "http://127.0.0.1:5174", "http://10.7.205.88:5174"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
