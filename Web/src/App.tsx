@@ -389,16 +389,28 @@ export default function App() {
       </section>
 
       <div className="actions-row">
-        <button className="primary-button" onClick={runAll} disabled={isRunningAll}>
-          {isRunningAll ? "正在执行所有测试..." : "一键运行全部测试"}
-        </button>
-        <button className="ghost-button" onClick={resetResults} disabled={isRunningAll}>
-          重置结果
-        </button>
-        {sharedState.tokenPreview && (
-          <span>
-            当前令牌：<code>{sharedState.tokenPreview}</code>
-          </span>
+        <div className="actions-buttons">
+          <button className="primary-button" onClick={runAll} disabled={isRunningAll}>
+            {isRunningAll ? "正在执行所有测试..." : "一键运行全部测试"}
+          </button>
+          <button className="ghost-button" onClick={resetResults} disabled={isRunningAll}>
+            重置结果
+          </button>
+        </div>
+
+        {(sharedState.userId !== undefined || sharedState.username || sharedState.tokenPreview) && (
+          <div className="session-info">
+            <span>
+              当前用户：
+              <code>ID {sharedState.userId ?? "未知"}</code>
+              <code>名称 {sharedState.username ?? "未知"}</code>
+            </span>
+            {sharedState.tokenPreview && (
+              <span>
+                当前令牌：<code>{sharedState.tokenPreview}</code>
+              </span>
+            )}
+          </div>
         )}
       </div>
 
