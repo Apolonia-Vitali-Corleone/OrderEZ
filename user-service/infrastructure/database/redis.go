@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultRedisAddr = "127.0.0.1:6379"
+	defaultRedisAddr = "192.168.233.136:6379"
 )
 
 func redisOptions() (*redis.Options, error) {

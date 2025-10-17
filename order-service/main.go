@@ -1,17 +1,27 @@
 package main
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"log"
+	"net"
 	"net/http"
 	"order-service/infrastructure/database"
 	"order-service/infrastructure/messaging"
 	"order-service/internal/handler"
 	"order-service/internal/service"
 	"order-service/util"
+	"os"
 	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
+
+func getenv(key, def string) string {
+	if v, ok := os.LookupEnv(key); ok && v != "" {
+		return v
+	}
+	return def
+}
 
 func main() {
 	// 设置 gin 运行模式为 "Release" 模式，提升性能
@@ -98,9 +108,19 @@ func main() {
 		orderGroup.POST("/", orderHandler.CreateOrder)
 	}
 
-	// 启动服务器
-	log.Println("订单服务启动在 http://127.0.0.1:48481")
-	if err := router.Run("127.0.0.1:48481"); err != nil {
+	// 从环境变量读取，提供默认值
+	host := getenv("HOST", "0.0.0.0") // 容器内通常用 0.0.0.0
+	port := getenv("PORT", "48482")   // 你的默认端口
+
+	// 可选：校验端口是否是合法数字
+	if _, err := net.LookupPort("tcp", port); err != nil {
+		log.Fatalf("非法端口 PORT=%q：%v", port, err)
+	}
+
+	addr := net.JoinHostPort(host, port) // 处理好 IPv6/IPv4 拼接
+	log.Printf("用户服务启动在 http://%s", addr)
+
+	if err := router.Run(addr); err != nil {
 		log.Fatalf("启动服务器失败: %v", err)
 	}
 }

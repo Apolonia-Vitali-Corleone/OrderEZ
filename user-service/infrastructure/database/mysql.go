@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const defaultMySQLDSN = "root:123@tcp(127.0.0.1:3306)/order_ez?charset=utf8mb4&parseTime=True&loc=Local"
+const defaultMySQLDSN = "root:1234@tcp(192.168.233.136:3306)/order_ez?charset=utf8mb4&parseTime=True&loc=Local"
 
 func mysqlDSN() string {
 	if dsn, ok := os.LookupEnv("MYSQL_DSN"); ok && dsn != "" {

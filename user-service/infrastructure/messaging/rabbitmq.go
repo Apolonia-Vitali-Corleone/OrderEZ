@@ -8,7 +8,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-const defaultRabbitMQURL = "amqp://guest:guest@127.0.0.1:5672/"
+const defaultRabbitMQURL = "amqp://guest:guest@192.168.233.136:5672/"
 
 type RabbitMQ struct {
 	conn    *amqp.Connection
