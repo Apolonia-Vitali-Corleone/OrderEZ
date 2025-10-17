@@ -10,8 +10,7 @@ OrderEZ 是一个围绕餐饮点餐流程的多服务后端。项目包含独立
 ├── deploy/local/mysql/init.sql  # MySQL 初始化脚本
 ├── order-service/               # 订单微服务
 ├── user-service/                # 用户微服务
-└── Web/                         # 前端资源（可选）
-    └── test-dashboard/          # 可视化测试面板（React + Vite）
+└── Web/                         # 可视化测试面板（React + Vite，可选）
 ```
 
 ## 运行前准备
@@ -113,10 +112,10 @@ cd ../user-service && go test ./...
 
 ## 可视化测试面板
 
-如果你希望通过 Web 界面快速验证接口是否可用，可使用 `Web/test-dashboard` 提供的 React 应用：
+如果你希望通过 Web 界面快速验证接口是否可用，可使用 `Web/` 目录下提供的 React 应用：
 
 ```bash
-cd Web/test-dashboard
+cd Web
 npm install
 npm run dev
 ```
