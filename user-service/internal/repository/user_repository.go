@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"user-service/internal/model/po"
 )
@@ -27,18 +26,10 @@ func (r *UserRepository) GetUserByUsername(username string) (*po.User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) Save(user po.User) error {
-	// 对密码进行加密
-	passwordBytes := []byte(user.Password)
-	password, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	user.Password = string(password)
+func (r *UserRepository) Save(user *po.User) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		result := tx.Save(&user)
-		if result.Error != nil {
-			return result.Error
+		if err := tx.Save(user).Error; err != nil {
+			return err
 		}
 		return nil
 	})
