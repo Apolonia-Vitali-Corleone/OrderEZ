@@ -76,18 +76,24 @@ func (s *UserService) Register(username, password string) (string, error) {
 	}
 
 	// 创建新用户
-	var newUser po.User
-	newUser.Username = username
-	newUser.Password = hashedPassword
+	newUser := &po.User{
+		Username: username,
+		Password: hashedPassword,
+	}
 
 	// 保存用户信息
-	err = s.userRepo.Save(newUser)
-	if err != nil {
+	if err := s.userRepo.Save(newUser); err != nil {
 		return "", err
 	}
 
-	// 获取到他的id
+	// 重新查询以获取数据库生成的 ID
 	byUsername, err := s.userRepo.GetUserByUsername(username)
+	if err != nil {
+		return "", err
+	}
+	if byUsername == nil {
+		return "", errors.New("failed to load newly created user")
+	}
 
 	// 生成 JWT 令牌
 	token, err := util.GenerateToken(byUsername.UserID)
@@ -107,7 +113,7 @@ func (s *UserService) GetAllUsers(page, pageSize int) ([]po.User, error) {
 // Logout 登出
 func (s *UserService) Logout(token string) error {
 	// 从 Redis 中删除令牌
-	err := s.redis.Del(context.Background(), token).Err()
+	err := s.redis.Del(context.Background(), "login:token:"+token).Err()
 	if err != nil {
 		return err
 	}

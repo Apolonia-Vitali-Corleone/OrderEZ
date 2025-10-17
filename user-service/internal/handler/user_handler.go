@@ -42,18 +42,18 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 func (h *UserHandler) Logout(c *gin.Context) {
 	// 从请求头中获取令牌
-	tokenStr := c.GetHeader("Authorization")
-	if tokenStr == "" {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少令牌"})
 		return
 	}
-	fmt.Println("要登出的token：" + tokenStr)
 
-	//// 去除令牌前缀 "Bearer "
-	//if len(tokenStr) > 7 && tokenStr[:7] == "Bearer " {
-	//	tokenStr = tokenStr[7:]
-	//}
-	//fmt.Println(tokenStr)
+	tokenStr, err := util.ParseBearerToken(authHeader)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println("要登出的token：" + tokenStr)
 
 	// 验证令牌
 	claims, err := util.ValidateToken(tokenStr)
@@ -72,7 +72,6 @@ func (h *UserHandler) Logout(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "登出成功"})
-	// c.JSON(http.StatusInternalServerError, gin.H{"error": "登出失败，请稍后再试"})
 }
 
 func (h *UserHandler) Register(c *gin.Context) {
