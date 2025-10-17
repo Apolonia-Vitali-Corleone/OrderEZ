@@ -110,7 +110,7 @@ func main() {
 
 	// 从环境变量读取，提供默认值
 	host := getenv("HOST", "0.0.0.0") // 容器内通常用 0.0.0.0
-	port := getenv("PORT", "48482")   // 你的默认端口
+	port := getenv("PORT", "48481")   // 你的默认端口
 
 	// 可选：校验端口是否是合法数字
 	if _, err := net.LookupPort("tcp", port); err != nil {
@@ -118,7 +118,7 @@ func main() {
 	}
 
 	addr := net.JoinHostPort(host, port) // 处理好 IPv6/IPv4 拼接
-	log.Printf("用户服务启动在 http://%s", addr)
+	log.Printf("订单服务启动在 http://%s", addr)
 
 	if err := router.Run(addr); err != nil {
 		log.Fatalf("启动服务器失败: %v", err)
