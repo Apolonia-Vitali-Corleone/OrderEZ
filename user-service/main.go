@@ -115,6 +115,11 @@ func main() {
 
 		// 获取所有的用户
 		userGroup.GET("/", userHandler.GetAllUsers)
+
+		// health检测
+		userGroup.GET("/health", func(c *gin.Context) {
+			c.String(http.StatusOK, "ok")
+		})
 	}
 
 	// 从环境变量读取，提供默认值

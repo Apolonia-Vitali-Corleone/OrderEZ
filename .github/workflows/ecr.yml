@@ -38,6 +38,25 @@ jobs:
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      # 新增步骤：清空ECR仓库gcy-app中的所有镜像（只执行一次）
+      - name: Clear all images in ECR repo ${{ env.ECR_REPO }}
+        if: ${{ matrix.name == 'user' }}  # 仅在第一个matrix实例中执行，避免重复删除
+        run: |
+          # 列出仓库中所有镜像的ID（包括标签和摘要）
+          IMAGE_IDS=$(aws ecr list-images --repository-name ${{ env.ECR_REPO }} --query 'imageIds' --output json)
+          
+          # 检查是否有镜像需要删除
+          if [ "$(echo $IMAGE_IDS | jq '. | length')" -gt 0 ]; then
+            echo "Deleting all images in ECR repo ${{ env.ECR_REPO }}..."
+            aws ecr batch-delete-image \
+              --repository-name ${{ env.ECR_REPO }} \
+              --image-ids "$IMAGE_IDS"
+            echo "All images deleted successfully."
+          else
+            echo "ECR repo ${{ env.ECR_REPO }} is already empty. No action needed."
+          fi
+        shell: bash
+
       - name: Set tags
         id: vars
         run: |
@@ -48,7 +67,6 @@ jobs:
             echo "REF_TAG=latest" >> $GITHUB_OUTPUT
           fi
 
-      # 启用 Buildx（container 驱动，才能用 type=gha 缓存）
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -58,7 +76,6 @@ jobs:
           driver-opts: |
             image=moby/buildkit:latest
 
-      # 用 matrix 构建并推送两个服务
       - name: Build & Push (${{ matrix.name }}-service)
         uses: docker/build-push-action@v6
         with:
@@ -72,3 +89,4 @@ jobs:
             ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ matrix.name }}-${{ steps.vars.outputs.REF_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+

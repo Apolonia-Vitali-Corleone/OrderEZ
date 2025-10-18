@@ -106,6 +106,9 @@ func main() {
 	orderGroup := router.Group("/order")
 	{
 		orderGroup.POST("/", orderHandler.CreateOrder)
+		orderGroup.GET("/health", func(c *gin.Context) {
+			c.String(http.StatusOK, "ok")
+		})
 	}
 
 	// 从环境变量读取，提供默认值

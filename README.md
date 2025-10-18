@@ -115,7 +115,7 @@ cd ../user-service && go test ./...
 如果你希望通过 Web 界面快速验证接口是否可用，可使用 `Web/` 目录下提供的 React 应用：
 
 ```bash
-cd Web
+cd web
 npm install
 npm run dev
 ```
