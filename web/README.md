@@ -18,9 +18,35 @@ npm install
 npm run dev
 ```
 
-Vite 会在 `http://127.0.0.1:5173` 启动开发服务器。页面默认请求本地运行的用户服务 (`http://127.0.0.1:48482`) 与订单服务 (`http://127.0.0.1:48481`)。
+Vite 会在本机的 5173 端口启动开发服务器。页面默认请求由 `src/api/client.ts` 中 `BASE_URL` 与 `WS_BASE_URL` 指定的地址。
 
-> 如果你的后端部署在其它地址或端口，可在左侧配置面板中直接修改。
+> 如果你的后端部署在其它地址或端口，可在左侧配置面板或环境变量中修改。
+
+## 覆盖 BASE_URL / WS_BASE_URL
+
+所有发往本地服务的 HTTP/WebSocket 请求都会通过 `src/api/client.ts` 暴露的客户端完成。你可以通过以下方式覆盖默认地址：
+
+- 构建或启动前设置环境变量：
+
+  ```bash
+  # HTTP 基础地址
+  BASE_URL="https://your-api.example.com" npm run dev
+
+  # 可选：独立覆盖订单服务或 WebSocket 地址
+  ORDER_SERVICE_BASE_URL="https://orders.example.com" npm run dev
+  WS_BASE_URL="wss://your-api.example.com" npm run dev
+  ```
+
+- 在部署的 HTML 中注入运行时变量（若需要在不重新构建的情况下调整）：
+
+  ```html
+  <script>
+    window.__BASE_URL__ = window.__BASE_URL__ || "https://your-api.example.com";
+    window.__WS_BASE_URL__ = window.__WS_BASE_URL__ || null;
+  </script>
+  ```
+
+默认情况下，`BASE_URL` 指向 127.0.0.1 的 48482 端口，你仍可以在页面左侧的“服务地址”区域手动调整为其它值。
 
 ## 使用建议
 
