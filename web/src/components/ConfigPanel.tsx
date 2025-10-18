@@ -1,4 +1,5 @@
 import { ChangeEvent } from "react";
+import { BASE_URL, ORDER_SERVICE_BASE_URL } from "../api/client";
 import { TestConfig } from "../types";
 import "./ConfigPanel.css";
 
@@ -40,7 +41,7 @@ export function ConfigPanel({ config, onChange, disabled }: ConfigPanelProps) {
             value={config.userServiceBase}
             onChange={handleInput}
             disabled={disabled}
-            placeholder="http://127.0.0.1:48482"
+            placeholder={BASE_URL}
           />
         </label>
         <label className="panel__field">
@@ -51,7 +52,7 @@ export function ConfigPanel({ config, onChange, disabled }: ConfigPanelProps) {
             value={config.orderServiceBase}
             onChange={handleInput}
             disabled={disabled}
-            placeholder="http://127.0.0.1:48481"
+            placeholder={ORDER_SERVICE_BASE_URL}
           />
         </label>
       </div>
