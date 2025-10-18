@@ -33,20 +33,42 @@ function readWindowValue(key: "__BASE_URL__" | "__WS_BASE_URL__") {
   return undefined;
 }
 
-export const BASE_URL =
-  (readEnvValue(["VITE_BASE_URL", "BASE_URL"]) ??
-    (typeof window !== "undefined" ? (readWindowValue("__BASE_URL__") as string | undefined) : undefined) ??
-    DEFAULT_BASE_URL);
+const HTTP_URL_PATTERN = /^https?:\/\//i;
+const WS_URL_PATTERN = /^wss?:\/\//i;
+
+function sanitizeUrl(candidate: unknown, pattern: RegExp): string | undefined {
+  if (typeof candidate !== "string") {
+    return undefined;
+  }
+  const trimmed = candidate.trim();
+  if (!pattern.test(trimmed)) {
+    return undefined;
+  }
+  return trimmed.replace(/\/+$/, "");
+}
+
+function readBaseUrl() {
+  const fromEnv = sanitizeUrl(readEnvValue(["VITE_BASE_URL", "BASE_URL"]), HTTP_URL_PATTERN);
+  if (fromEnv) {
+    return fromEnv;
+  }
+  const fromWindow =
+    typeof window !== "undefined" ? sanitizeUrl(readWindowValue("__BASE_URL__"), HTTP_URL_PATTERN) : undefined;
+  return fromWindow ?? DEFAULT_BASE_URL;
+}
+
+export const BASE_URL = readBaseUrl();
 
 const ORDER_BASE_FALLBACK = BASE_URL === DEFAULT_BASE_URL ? DEFAULT_ORDER_BASE_URL : BASE_URL;
 
 export const ORDER_SERVICE_BASE_URL =
-  readEnvValue(["VITE_ORDER_SERVICE_BASE_URL", "ORDER_SERVICE_BASE_URL"]) ?? ORDER_BASE_FALLBACK;
+  sanitizeUrl(readEnvValue(["VITE_ORDER_SERVICE_BASE_URL", "ORDER_SERVICE_BASE_URL"]), HTTP_URL_PATTERN) ??
+  ORDER_BASE_FALLBACK;
 
 export const WS_BASE_URL =
-  (readEnvValue(["VITE_WS_BASE_URL", "WS_BASE_URL"]) ??
-    (typeof window !== "undefined" ? (readWindowValue("__WS_BASE_URL__") as string | undefined) : undefined) ??
-    BASE_URL.replace(/^http/, "ws"));
+  sanitizeUrl(readEnvValue(["VITE_WS_BASE_URL", "WS_BASE_URL"]), WS_URL_PATTERN) ??
+  (typeof window !== "undefined" ? sanitizeUrl(readWindowValue("__WS_BASE_URL__"), WS_URL_PATTERN) : undefined) ??
+  BASE_URL.replace(/^http/, "ws");
 
 export async function http(path: string | URL, options: RequestInit = {}) {
   const input = typeof path === "string" ? path : path.toString();
