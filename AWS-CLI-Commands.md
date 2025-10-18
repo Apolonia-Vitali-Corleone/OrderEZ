@@ -338,7 +338,7 @@ guetst
 
 guestguestguest
 
-amqps://guetst:guestguestguest@b-ebc9761e-87c4-4c32-a0c7-61e129379c36.mq.ap-south-1.on.aws:5671
+amqps://guetst:guestguestguest@b-ebc9761e-87c4-4c32-a0c7-61e129379c36.mq.ap-south-1.on.aws:5671/%2F
 
 ```
 {
@@ -464,6 +464,19 @@ aws ec2 wait instance-status-ok --region $REGION --instance-ids $INSTANCE_ID
 ##  直接开壳（SSM）
 
 ```
+
+```
+
+
+
+
+
+```
+RABBIT_HOST="b-ebc9761e-87c4-4c32-a0c7-61e129379c36.mq.ap-south-1.on.aws"   # 例：b-abc123.mq.ap-southeast-1.amazonaws.com
+AMQP_PLAIN_PORT=5672                 # 明文 AMQP（很多托管环境禁用）
+AMQP_TLS_PORT=5671                   # TLS AMQP（Amazon MQ 常用）
+MGMT_HTTP=15672                      # 管理控制台 HTTP（自建常用）
+MGMT_HTTPS=15671                     # 管理控制台 HTTPS（常用）
 
 ```
 
