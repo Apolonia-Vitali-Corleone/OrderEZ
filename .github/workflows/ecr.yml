@@ -5,9 +5,9 @@ on:
     tags: [ "v*" ]
 
 env:
-  AWS_REGION: ap-east-2
+  AWS_REGION: ap-south-1
   AWS_ACCOUNT_ID: 818719120332
-  ECR_REPO: gcy-app
+  ECR_REPO: order-ez
 
 permissions:
   id-token: write
