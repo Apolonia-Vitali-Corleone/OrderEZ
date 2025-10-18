@@ -25,6 +25,7 @@ jobs:
           - name: order
             svc_dir: order-service
             dockerfile: order-service/Dockerfile
+      max-parallel: 1  # 串行执行，一次只构建一个服务
 
     steps:
       - uses: actions/checkout@v4
@@ -37,25 +38,6 @@ jobs:
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
-
-      # 新增步骤：清空ECR仓库gcy-app中的所有镜像（只执行一次）
-      - name: Clear all images in ECR repo ${{ env.ECR_REPO }}
-        if: ${{ matrix.name == 'user' }}  # 仅在第一个matrix实例中执行，避免重复删除
-        run: |
-          # 列出仓库中所有镜像的ID（包括标签和摘要）
-          IMAGE_IDS=$(aws ecr list-images --repository-name ${{ env.ECR_REPO }} --query 'imageIds' --output json)
-          
-          # 检查是否有镜像需要删除
-          if [ "$(echo $IMAGE_IDS | jq '. | length')" -gt 0 ]; then
-            echo "Deleting all images in ECR repo ${{ env.ECR_REPO }}..."
-            aws ecr batch-delete-image \
-              --repository-name ${{ env.ECR_REPO }} \
-              --image-ids "$IMAGE_IDS"
-            echo "All images deleted successfully."
-          else
-            echo "ECR repo ${{ env.ECR_REPO }} is already empty. No action needed."
-          fi
-        shell: bash
 
       - name: Set tags
         id: vars
