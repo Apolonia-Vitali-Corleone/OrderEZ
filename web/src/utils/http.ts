@@ -1,3 +1,4 @@
+import { http } from "../api/client";
 import { formatJson } from "./format";
 
 export interface ParsedResponse {
@@ -18,7 +19,7 @@ export async function parseResponse(response: Response): Promise<ParsedResponse>
   }
 }
 
-export async function fetchJson(input: RequestInfo, init?: RequestInit): Promise<ParsedResponse> {
-  const response = await fetch(input, init);
+export async function fetchJson(path: string | URL, init?: RequestInit): Promise<ParsedResponse> {
+  const response = await http(path, init);
   return parseResponse(response);
 }

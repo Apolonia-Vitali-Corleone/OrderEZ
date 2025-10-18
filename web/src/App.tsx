@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import "./App.css";
 import { ConfigPanel } from "./components/ConfigPanel";
+import { BASE_URL, ORDER_SERVICE_BASE_URL } from "./api/client";
 import { TestCard } from "./components/TestCard";
 import { decodeJwt, formatJson, nowLabel } from "./utils/format";
 import { fetchJson } from "./utils/http";
@@ -22,8 +23,8 @@ const defaultOrderItems = `[
 ]`;
 
 const defaultConfig: TestConfig = {
-  userServiceBase: "http://127.0.0.1:48482",
-  orderServiceBase: "http://127.0.0.1:48481",
+  userServiceBase: BASE_URL,
+  orderServiceBase: ORDER_SERVICE_BASE_URL,
   defaultPassword: "OrderEz#123",
   pageSize: 10,
   useManualAccount: false,
