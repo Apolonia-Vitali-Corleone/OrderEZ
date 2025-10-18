@@ -1,5 +1,5 @@
 .idea
-web/test-dashboard/node_modules/
-web/test-dashboard/dist/
-web/test-dashboard/.vite/
+web/node_modules/
+web/dist/
+
 
