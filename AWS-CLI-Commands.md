@@ -4,7 +4,7 @@ REGION=ap-east-2
 # 获取Region的全部ECR Repo（只有名称）
 
 ```bash
-REGION=ap-east-2
+REGION=ap-south-1
 
 aws ecr describe-repositories --region "$REGION" --query 'repositories[].repositoryName' --output table
 ```
@@ -78,7 +78,9 @@ aws ecr list-images --region "$REGION" --repository-name "$REPO" \
 补充：没有任何输出，因为都删除完了
 
 
-# 获取当前Region的全部VPC以及VPCID
+# 查看全部VPC---当前Region的以及VPC-ID
+```bash
+
 aws ec2 describe-vpcs \
   --query 'Vpcs[*].{
     VpcId: VpcId,
@@ -87,10 +89,16 @@ aws ec2 describe-vpcs \
     State: State
   }' \
   --output table
+```
 
-# 获取当前VPC中的全部Subnet（需要在Values=输入VPCID）
+
+
+# 查看全部Subnet---当前VPC中的（需要在Values=输入VPCID）
+```bash
+VPC_ID=vpc-06ac1e3cb683ced3e
+
 aws ec2 describe-subnets \
-  --filters "Name=vpc-id,Values=vpc-0ffa225f05aa313ff" \
+  --filters "Name=vpc-id,Values=$VPC_ID" \
   --query 'Subnets[*].{
     SubnetId: SubnetId,
     Name: Tags[?Key==`Name`].Value|[0],
@@ -99,18 +107,12 @@ aws ec2 describe-subnets \
     State: State
   }' \
   --output table
-
-
-
-# 你的 VPC 和两个公有子网（不同可用区）
-VPC_ID=vpc-0ffa225f05aa313ff
-
-SUBNET1=subnet-07d2079bd228993d6
-SUBNET2=subnet-042372dfc0b33748e
-SUBNET3=subnet-08a70f6938a41beb4
-
-# 获取当前region全部security group（只展示关键信息）
 ```
+
+
+
+# 查看security group---当前region全部（只展示关键信息）
+```bash
 aws ec2 describe-security-groups \
   --query 'SecurityGroups[*].{
     GroupId: GroupId,          
@@ -126,24 +128,16 @@ aws ec2 describe-security-groups \
 
 ALB_SG_ID=sg-073278699b315ce7c
 
-# 命名前缀
-NAME_PREFIX=order-ez
-
-# health检测
-WEB_HEALTH=/health
-USER_HEALTH=/user/health
-ORDER_HEALTH=/order/health
-
-# 创建VPC
-
-# 根据VPC创建子网
 
 
-
-# 根据NAME_PREFIX、SUBNET、ALB_SG_ID创建ALB
+# 创建ALB---根据NAME_PREFIX、SUBNET、ALB_SG_ID
 ```bash
 NAME_PREFIX=order-ez
-SUBNET1=
+SUBNET1=subnet-0b01e08b0a1eb2896
+SUBNET2=subnet-0f51eef8f1231e5c6
+SUBNET3=subnet-0ee659357bb931f38
+ALB_SG_ID=sg-05bf106de7ec670a1
+REGION=ap-south-1
 
 ALB_ARN=$(aws elbv2 create-load-balancer \
   --name ${NAME_PREFIX}-alb \
@@ -158,8 +152,10 @@ ALB_ARN=$(aws elbv2 create-load-balancer \
 
 
 
-# 根据ALB_ARN创建ALB对应的ALB-DNS
+# 创建ALB_DNS---根据ALB_ARN
 ```bash
+ALB_ARN=arn:aws:elasticloadbalancing:ap-south-1:818719120332:loadbalancer/app/order-ez-alb/d2b4ce6850319d5a
+REGION=ap-south-1
 ALB_DNS=$(aws elbv2 describe-load-balancers \
   --load-balancer-arns $ALB_ARN --region $REGION \
   --query 'LoadBalancers[0].DNSName' --output text) && echo "ALB DNS: $ALB_DNS"
@@ -177,9 +173,9 @@ aws elbv2 describe-load-balancers \
 
 
 
-# 根据ALB_NAME查看ALB的状态与对应的ALB-DNS
+# 查看ALB_DNS---根据ALB_NAME查看ALB的状态DNS
 ```bash
-REGION=ap-east-2
+REGION=ap-south-1
 ALB_NAME="order-ez-alb"
 aws elbv2 describe-load-balancers --region "$REGION" --names "$ALB_NAME" \
   --query 'LoadBalancers[0].{Name:LoadBalancerName,State:State.Code,DNS:DNSName,Scheme:Scheme,Type:Type}' --output table
