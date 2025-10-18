@@ -316,3 +316,154 @@ export LOG_GROUP="/ecs/dev-web"
 
 创建SG
 
+
+
+mysql
+
+admin
+
+12345678
+
+order-ez-instance-1.cn6i6q8c6duc.ap-south-1.rds.amazonaws.com:3306
+
+order-ez-redis-cnpbde.serverless.aps1.cache.amazonaws.com:6379
+
+redis
+
+
+
+rabbitmq
+
+guetst
+
+guestguestguest
+
+amqps://guetst:guestguestguest@b-ebc9761e-87c4-4c32-a0c7-61e129379c36.mq.ap-south-1.on.aws:5671
+
+```
+{
+  "containerDefinitions": [
+    {
+      "name": "your-go-service",
+      "image": "your-image:tag",
+      "environment": [
+        { "name": "MYSQL_ADDR", "value": "my-aurora-cluster.cluster-xxx.rds.amazonaws.com:3306" },
+        { "name": "REDIS_ADDR", "value": "my-redis-cluster.eaogs8.0001.ap-south-1.cache.amazonaws.com:6379" },
+        { "name": "RABBITMQ_ADDR", "value": "amqps://mybroker.mq.ap-south-1.amazonaws.com:5671" }
+      ]
+    }
+  ]
+}
+```
+
+
+
+# 创建测试EC2
+
+## 先设变量（改成你的值）
+
+```
+REGION=ap-south-1
+VPC_ID=vpc-06ac1e3cb683ced3e
+SUBNET_ID=subnet-0724d0b1e091dcefc      # 你的“目标子网”（和要测的 DB/Redis/RabbitMQ 在同 VPC/可达路由）
+INSTANCE_NAME=vpc-test-shell
+INSTANCE_TYPE=t3.micro     
+```
+
+## 安全组（入站空、仅出站放行）
+
+> 作为“测试壳子”不需要任何入站规则；只要默认的全部出站即可。
+
+```
+SG_ID=$(aws ec2 create-security-group \
+  --region $REGION \
+  --group-name ${INSTANCE_NAME}-sg \
+  --description "Outbound-only SG for VPC test shell" \
+  --vpc-id $VPC_ID \
+  --query 'GroupId' --output text)
+
+# 出站默认 Allow All（若你们安全基线禁止了，至少放行到目标端口/网段）
+
+```
+
+##  给实例挂 SSM 托管角色（免公网、免 SSH）
+
+```
+aws iam create-role --role-name EC2SSMRole \
+  --assume-role-policy-document '{
+    "Version":"2012-10-17",
+    "Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]
+  }' >/dev/null 2>&1 || true
+
+aws iam attach-role-policy --role-name EC2SSMRole \
+  --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore >/dev/null 2>&1 || true
+
+aws iam create-instance-profile --instance-profile-name EC2SSMInstanceProfile >/dev/null 2>&1 || true
+aws iam add-role-to-instance-profile --instance-profile-name EC2SSMInstanceProfile --role-name EC2SSMRole >/dev/null 2>&1 || true
+sleep 10
+
+```
+
+## 找最新 Amazon Linux 2023 AMI
+
+```
+$REGION=
+
+AMI_ID=$(aws ssm get-parameters \
+  --names /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 \
+  --query 'Parameters[0].Value' --output text --region ${REGION})
+echo AMI_ID=$AMI_ID
+```
+
+
+
+## User Data：安装常用连通性/客户端工具
+
+```
+cat > /tmp/userdata.sh <<"EOF"
+#!/bin/bash
+set -euxo pipefail
+
+dnf -y update
+dnf -y install jq curl bind-utils iproute nc telnet traceroute tcpdump openssl
+dnf -y install mysql postgresql redis
+# rabbitmqadmin（通过 pip 装，纯客户端，走 15672 HTTP API）
+dnf -y install python3-pip
+pip3 install --break-system-packages rabbitmq-admin==0.0.2 || true
+
+# 确保 SSM agent 运行
+systemctl enable --now amazon-ssm-agent || true
+EOF
+
+USER_DATA_B64=$(base64 -w0 /tmp/userdata.sh)
+
+```
+
+
+
+## 启动“测试壳子”EC2（私网，无公网 IP）
+
+```
+AMI_ID=ami-06fa3f12191aa3337
+INSTANCE_ID=$(aws ec2 run-instances \
+  --region $REGION \
+  --image-id $AMI_ID \
+  --instance-type $INSTANCE_TYPE \
+  --subnet-id $SUBNET_ID \
+  --security-group-ids $SG_ID \
+  --iam-instance-profile Name=EC2SSMInstanceProfile \
+  --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=vpc-test-shell}]" \
+  --user-data fileb:///tmp/userdata.sh \
+  --no-associate-public-ip-address \
+  --query 'Instances[0].InstanceId' --output text)
+echo INSTANCE_ID=$INSTANCE_ID
+aws ec2 wait instance-status-ok --region $REGION --instance-ids $INSTANCE_ID
+
+```
+
+##  直接开壳（SSM）
+
+```
+
+```
+
