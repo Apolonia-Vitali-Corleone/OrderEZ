@@ -480,3 +480,9 @@ MGMT_HTTPS=15671                     # 管理控制台 HTTPS（常用）
 
 ```
 
+
+
+```
+aws ec2 terminate-instances --instance-ids $(aws ec2 describe-instances --query "Reservations[*].Instances[*].InstanceId" --output text)
+```
+

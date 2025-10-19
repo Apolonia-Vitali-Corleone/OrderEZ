@@ -2,7 +2,9 @@ package database
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net"
 	"os"
 	"strconv"
 
@@ -24,8 +26,12 @@ func redisOptions() (*redis.Options, error) {
 		opts.Addr = addr
 	}
 
-	if password, ok := os.LookupEnv("REDIS_PASSWORD"); ok {
-		opts.Password = password
+	if user := os.Getenv("REDIS_USERNAME"); user != "" {
+		opts.Addr = user
+	}
+
+	if pw, ok := os.LookupEnv("REDIS_PASSWORD"); ok && pw != "" {
+		opts.Password = pw
 	}
 
 	if dbStr := os.Getenv("REDIS_DB"); dbStr != "" {
@@ -34,6 +40,16 @@ func redisOptions() (*redis.Options, error) {
 			return nil, fmt.Errorf("invalid REDIS_DB value %q: %w", dbStr, err)
 		}
 		opts.DB = db
+	}
+
+	if os.Getenv("REDIS_TLS") != "false" {
+		host, _, err := net.SplitHostPort(opts.Addr)
+		if err != nil {
+			host = opts.Addr
+		}
+		opts.TLSConfig = &tls.Config{
+			ServerName: host,
+		}
 	}
 
 	return opts, nil
