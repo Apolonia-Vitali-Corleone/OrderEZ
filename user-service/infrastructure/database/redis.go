@@ -27,7 +27,7 @@ func redisOptions() (*redis.Options, error) {
 	}
 
 	if user := os.Getenv("REDIS_USERNAME"); user != "" {
-		opts.Addr = user
+		opts.Username = user
 	}
 
 	if pw, ok := os.LookupEnv("REDIS_PASSWORD"); ok && pw != "" {

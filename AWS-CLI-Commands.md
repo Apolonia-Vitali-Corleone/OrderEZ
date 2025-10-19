@@ -486,3 +486,28 @@ MGMT_HTTPS=15671                     # 管理控制台 HTTPS（常用）
 aws ec2 terminate-instances --instance-ids $(aws ec2 describe-instances --query "Reservations[*].Instances[*].InstanceId" --output text)
 ```
 
+
+
+# 环境变量
+
+MYSQL
+
+```
+MYSQL_DSN
+admin:12345678@tcp(order-ez-instance-1.cn6i6q8c6duc.ap-south-1.rds.amazonaws.com:3306)/order_ez?tls=skip-verify&charset=utf8mb4&parseTime=True&loc=Local
+```
+
+REDIS
+
+```
+RABBITMQ_URL
+amqps://guetst:guestguestguest@b-ebc9761e-87c4-4c32-a0c7-61e129379c36.mq.ap-south-1.on.aws:5671
+```
+
+RABBITMQ
+
+```
+REDIS_ADDR
+order-ez-redis-cnpbde.serverless.aps1.cache.amazonaws.com:6379
+```
+
